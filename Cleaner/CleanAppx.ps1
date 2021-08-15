@@ -53,6 +53,8 @@ $WinOptFeatList =
 function removeAppxPackage {
   param (
     [ref]$RemoveList
+    [ref]$SuccessfullyRemovedList
+    [ref]$UnsuccessfullyRemovedList
   )
 
   foreach ($Appx in $AppxListToRemove)
@@ -64,26 +66,41 @@ function removeAppxPackage {
 
       foreach ($ASL in $AppxSimilarList)
       {
-        $PackagePath = $ASL.InstallLocation
-        $PackageName = $ASL.Name
+        $error.clear()
+        Try
+        {
+          $PackagePath = $ASL.InstallLocation
+          $PackageName = $ASL.Name
 
-        # Try and remove the Appx
-        Remove-AppxPackage -Package $ASL -AllUsers
+          # Try and remove the Appx
+          Remove-AppxPackage -Package $ASL -AllUsers
 
-        # Try and remove residual installation folder
-        # TODO test if this is needed. I think if the Remove-AppxPackage succeeds then this may not be needed.
-        Remove-Item $PackagePath -Recurse -ErrorAction SilentlyContinue
+          # Try and remove residual installation folder
+          # TODO test if this is needed. I think if the Remove-AppxPackage succeeds then this may not be needed.
+          Remove-Item $PackagePath -Recurse -ErrorAction SilentlyContinue
 
-        # Try and remove other folders of the same appx
-        # There can be a few older versions
-        Get-ChildItem "$Env:Programfiles\WindowsApps" |
-          Where-Object Name -Like "*$($PackageName)*" |
-          ForEach-Object `
-          {
-            Remove-Item -LiteralPath $_.Name -Recurse -ErrorAction SilentlyContinue
-          }
+          # Try and remove other folders of the same appx
+          # There can be a few older versions
+          Get-ChildItem "$Env:Programfiles\WindowsApps" |
+            Where-Object Name -Like "*$($PackageName)*" |
+            ForEach-Object `
+            {
+              Remove-Item -LiteralPath $_.Name -Recurse -ErrorAction SilentlyContinue
+            } #
 
-      }
+
+        } # End Try
+        catch
+        {
+          $UnsuccessfullyRemovedList += $AppxPackageList
+        } # End Catch
+
+
+        if (!$error)
+        {
+          $SuccessfullyRemovedList += $AppxPackageList
+        } # End If (!$error)
+      } # End ForEach $AppxSimilarList
 
 
 
@@ -96,15 +113,30 @@ function removeAppxPackage {
         ForEach-Object `
         {
           Remove-Item -LiteralPath $_.Name
-        }
+        } # End ForEach-Object
 
 
       # Get Provisioned Appx.
       $AppxProvSimilarList = Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx
 
-      foreach ($ProvPackage in $AppxProvSimilarList) {
+      foreach ($ProvPackage in $AppxProvSimilarList)
+      {
+        $error.clear()
+        Try
+        {
+          $ProvPackage | Remove-AppxProvisionedPackage -Online\
+        } # End Try
+        catch
+        {
+          $UnsuccessfullyRemovedList += $AppxPackageList
+        } # End Catch
 
-        $ProvPackage | Remove-AppxProvisionedPackage -Online
+
+        if (!$error)
+        {
+          $SuccessfullyRemovedList += $AppxPackageList
+        } # End If (!$error)
+
 
       } # End ForEach $AppxProvSimilarList
 
@@ -127,6 +159,8 @@ function removeAppxPackage {
 function removeWinOptFeat {
   param (
     [ref]$WOFListToRemove
+    [ref]$SuccessfullyRemoved
+    [ref]$UnsuccessfullyRemoved
   )
 
   foreach ($WOF in $WOFListToRemove)
