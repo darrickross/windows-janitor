@@ -36,6 +36,17 @@ $AppxList =
   "*Wallet*",
   "*MixedReality*",
   "*FeedbackHub*",
+  "**",
+  "**",
+  "**",
+  ""
+}
+
+$WinOptFeatList =
+{
+  "*internetexplorer*",
+  "*Hello-Face*",
+  "*QuickAssist*",
   ""
 }
 
@@ -56,6 +67,21 @@ function removeAppxPackage {
       }
   }
 }
+
+function removeWinOptFeat {
+  param (
+    [ref]$WOFListToRemove
+  )
+
+  foreach ($WOF in $WOFListToRemove)
+  {
+    if ($WOF -ne "")
+    {
+      Get-WindowsPackage -Online | Where PackageName -like $WOF | Remove-WindowsPackage -Online -NoRestart
+    }
+  }
+}
+
 $CurrUserDesktopPath = [Environment]::GetFolderPath("Desktop")
 $Date = Get-Date -Format "yyyyMMdd-HHmm"
 $LogFileName = "CleanAppx_$($Date).txt"
