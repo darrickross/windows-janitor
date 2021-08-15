@@ -3,7 +3,8 @@
 #   https://www.reddit.com/r/sysadmin/comments/mvcbfb/sysadmins_post_a_repetitive_task_you_automated/gvc96x0
 #   https://github.com/adolfintel/Windows10-Privacy
 
-
+$ErrorForgroundColor = "White"
+$ErrorBackgroundColor = "Red"
 
 
 $AppxList =
@@ -11,7 +12,7 @@ $AppxList =
   "*BioEnrollment*",
   "*ParentalControls*",
   "*Advertising.xaml*",
-  "*Advertising.xaml*",
+  "*Advertising.xaml*", #TODO TEST if this is needed. According to some other scripts you want to list it twice.
   "*zune*",
   "*xbox*",
   "*maps*",
@@ -56,6 +57,13 @@ function removeAppxPackage {
     [ref]$SuccessfullyRemovedList
     [ref]$UnsuccessfullyRemovedList
   )
+
+  if ($RemoveList -ne $null)
+  {
+    Write-Host "removeAppxPackage() was not provided with a list of packages to look for and remove." -ForegroundColor $($ErrorForgroundColor) -BackgroundColor $($ErrorBackgroundColor)
+    return
+  }
+
 
   foreach ($Appx in $AppxListToRemove)
   {
