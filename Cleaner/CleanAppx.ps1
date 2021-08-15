@@ -76,16 +76,53 @@ function removeAppxPackage {
 
         # Try and remove other folders of the same appx
         # There can be a few older versions
-        Get-ChildItem "$Env:Programfiles\WindowsApps" `
-          | Where-Object Name -Like "*$($PackageName)*" `
-          | ForEach-Object `
+        Get-ChildItem "$Env:Programfiles\WindowsApps" |
+          Where-Object Name -Like "*$($PackageName)*" |
+          ForEach-Object `
           {
             Remove-Item -LiteralPath $_.Name -Recurse -ErrorAction SilentlyContinue
           }
 
       }
-  }
-}
+
+
+
+      # Try and remove all the app folders as well.
+      # This is different, it tries to remove others that may have been missed.
+      # However I think this might be redudent in 99% if not 100% of scenerios.
+      # TODO Test if this is needed for default Windows 10 installs.
+      Get-ChildItem "$Env:Programfiles\WindowsApps" |
+        Where-Object Name -Like $Appx |
+        ForEach-Object `
+        {
+          Remove-Item -LiteralPath $_.Name
+        }
+
+
+      # Get Provisioned Appx.
+      $AppxProvSimilarList = Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx
+
+      foreach ($ProvPackage in $AppxProvSimilarList) {
+
+        $ProvPackage | Remove-AppxProvisionedPackage -Online
+
+      } # End ForEach $AppxProvSimilarList
+
+      # # Could probably seprate each into its own try catch to differenciate between a failing Get-AppxProvisionedPackage or Get-AppxPackage in case that is a case.
+      #
+      # Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx | Remove-AppxProvisionedPackage -Online
+      #
+      # # Try to remove the file path to help clear the disk.
+      # # It's not much but honest work
+      #
+      # # TODO make an option to remove the package from all user's appdata folder not just curr user
+      # $AppxPath="$Env:LOCALAPPDATA\Packages\$Appx*"
+      #
+      # Remove-Item $AppxPath -Recurse -Force -ErrorAction SilentlyContinue
+
+    } # End if ($Appx -ne "")
+  } # End ForEach, $AppxListToRemove
+} # End removeAppxPackage()
 
 function removeWinOptFeat {
   param (
