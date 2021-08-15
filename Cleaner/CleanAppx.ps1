@@ -53,7 +53,10 @@ $WinOptFeatList =
 
 function removeAppxPackage {
   param (
+    #Required, Check if they exist
     [ref]$RemoveList
+
+    #Optional, when using check that they exist.
     [ref]$SuccessfullyRemovedList
     [ref]$UnsuccessfullyRemovedList
   )
@@ -166,7 +169,10 @@ function removeAppxPackage {
 
 function removeWinOptFeat {
   param (
+    #Required, Check if they exist
     [ref]$WOFListToRemove
+
+    #Optional, when using check that they exist.
     [ref]$SuccessfullyRemoved
     [ref]$UnsuccessfullyRemoved
   )
