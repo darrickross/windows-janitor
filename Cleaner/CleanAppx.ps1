@@ -7,49 +7,45 @@ $ErrorForgroundColor = "White"
 $ErrorBackgroundColor = "Red"
 
 
-$AppxList =
-{
-  "*BioEnrollment*",
-  "*ParentalControls*",
-  "*Advertising.xaml*",
-  "*Advertising.xaml*", #TODO TEST if this is needed. According to some other scripts you want to list it twice.
-  "*zune*",
-  "*xbox*",
-  "*maps*",
-  "*sticky*",
-  "*alarms*",
-  "*people*",
-  "*comm*",
-  "*3dbuilder*",
-  "*calculator*",
-  "*windowscommunicationsapps*",
-  "*windowscamera*",
-  "*officehub*",
-  "*skypeapp*",
-  "*getstarted*",
-  "*solitairecollection*",
-  "*bing*",
-  "*onenote*",
-  "*windowsphone*",
-  "*soundrecorder*",
-  "*YourPhone*",
-  "*GetHelp*",
-  "*Wallet*",
-  "*MixedReality*",
-  "*FeedbackHub*",
-  "**",
-  "**",
-  "**",
-  ""
-}
+$AppxList =@(
+  "*BioEnrollment*"
+  "*ParentalControls*"
+  "*Advertising.xaml*"
+  "*Advertising.xaml*" #TODO TEST if this is needed. According to some other scripts you want to list it twice.
+  "*zune*"
+  "*xbox*"
+  "*maps*"
+  "*sticky*"
+  "*alarms*"
+  "*people*"
+  "*comm*"
+  "*3dbuilder*"
+  "*calculator*"
+  "*windowscommunicationsapps*"
+  "*windowscamera*"
+  "*officehub*"
+  "*skypeapp*"
+  "*getstarted*"
+  "*solitairecollection*"
+  "*bing*"
+  "*onenote*"
+  "*windowsphone*"
+  "*soundrecorder*"
+  "*YourPhone*"
+  "*GetHelp*"
+  "*Wallet*"
+  "*MixedReality*"
+  "*FeedbackHub*"
+  #"**"
+  #"**"
+  #"**"
+)
 
-$WinOptFeatList =
-{
-  "*internetexplorer*",
-  "*Hello-Face*",
-  "*QuickAssist*",
-  ""
-}
+$WinOptFeatList = @(
+  "*internetexplorer*"
+  "*Hello-Face*"
+  "*QuickAssist*"
+)
 
 function removeAppxPackage {
   param (
@@ -68,14 +64,14 @@ function removeAppxPackage {
   }
 
 
-  foreach ($Appx in $AppxListToRemove)
+  ForEach ($Appx in $AppxListToRemove)
   {
     if ($Appx -ne "")
     {
       # Get a list of appx that are similar
       $AppxSimilarList = Get-AppxPackage -AllUsers | where PackageFullName -like $Appx
 
-      foreach ($ASL in $AppxSimilarList)
+      ForEach ($ASL in $AppxSimilarList)
       {
         $error.clear()
         Try
@@ -130,7 +126,7 @@ function removeAppxPackage {
       # Get Provisioned Appx.
       $AppxProvSimilarList = Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx
 
-      foreach ($ProvPackage in $AppxProvSimilarList)
+      ForEach ($ProvPackage in $AppxProvSimilarList)
       {
         $error.clear()
         Try
@@ -177,7 +173,7 @@ function removeWinOptFeat {
     [ref]$UnsuccessfullyRemoved
   )
 
-  foreach ($WOF in $WOFListToRemove)
+  ForEach ($WOF in $WOFListToRemove)
   {
     if ($WOF -ne "")
     {
