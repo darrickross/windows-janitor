@@ -59,11 +59,30 @@ function removeAppxPackage {
   {
     if ($Appx -ne "")
     {
-      #Get a list of
+      # Get a list of appx that are similar
       $AppxSimilarList = Get-AppxPackage -AllUsers | where PackageFullName -like $Appx
 
       foreach ($ASL in $AppxSimilarList)
       {
+        $PackagePath = $ASL.InstallLocation
+        $PackageName = $ASL.Name
+
+        # Try and remove the Appx
+        Remove-AppxPackage -Package $ASL -AllUsers
+
+        # Try and remove residual installation folder
+        # TODO test if this is needed. I think if the Remove-AppxPackage succeeds then this may not be needed.
+        Remove-Item $PackagePath -Recurse -ErrorAction SilentlyContinue
+
+        # Try and remove other folders of the same appx
+        # There can be a few older versions
+        Get-ChildItem "$Env:Programfiles\WindowsApps" `
+          | Where-Object Name -Like "*$($PackageName)*" `
+          | ForEach-Object `
+          {
+            Remove-Item -LiteralPath $_.Name -Recurse -ErrorAction SilentlyContinue
+          }
+
       }
   }
 }
