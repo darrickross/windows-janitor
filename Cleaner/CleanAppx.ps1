@@ -8,8 +8,34 @@
 
 $AppxList =
 {
+  "*BioEnrollment*",
+  "*ParentalControls*",
+  "*Advertising.xaml*",
+  "*Advertising.xaml*",
   "*zune*",
+  "*xbox*",
+  "*maps*",
+  "*sticky*",
+  "*alarms*",
+  "*people*",
+  "*comm*",
+  "*3dbuilder*",
+  "*calculator*",
+  "*windowscommunicationsapps*",
+  "*windowscamera*",
+  "*officehub*",
+  "*skypeapp*",
+  "*getstarted*",
+  "*solitairecollection*",
   "*bing*",
+  "*onenote*",
+  "*windowsphone*",
+  "*soundrecorder*",
+  "*YourPhone*",
+  "*GetHelp*",
+  "*Wallet*",
+  "*MixedReality*",
+  "*FeedbackHub*",
   ""
 }
 
