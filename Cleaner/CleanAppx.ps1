@@ -129,51 +129,82 @@ function removeAppxPackage {
       ForEach ($ProvPackage in $AppxProvSimilarList)
       {
         $error.clear()
-        Try
+        try
         {
-          $ProvPackage | Remove-AppxProvisionedPackage -Online\
-        } # End Try
+          $PackagePath = $ASL.InstallLocation
+          $PackageName = $ASL.Name
+
+          #Try and remove the Appx
+          Remove-AppxPackage -Package $ASL -AllUsers
+
+          #Try and remove residual installation folder
+          Remove-Item $PackagePath -Recurse -ErrorAction SilentlyContinue
+
+          #Try and remove other folders of the same appx
+          Get-ChildItem "$Env:Programfiles\WindowsApps" | Where-Object Name -Like "*$($PackageName)*" | ForEach-Object { Remove-Item -LiteralPath $_.Name -Recurse -ErrorAction SilentlyContinue }
+
+        }
         catch
         {
           $UnsuccessfullyRemovedList += $AppxPackageList
-        } # End Catch
-
-
+        }
         if (!$error)
         {
           $SuccessfullyRemovedList += $AppxPackageList
-        } # End If (!$error)
+        }
+
+      }
+
+      #Try and remove all the app folders as well.
+      Get-ChildItem | Where-Object Name -Like $Appx | ForEach-Object { Remove-Item -LiteralPath $_.Name }
 
 
-      } # End ForEach $AppxProvSimilarList
+      $AppxProvSimilarList = Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx
 
-      # # Could probably seprate each into its own try catch to differenciate between a failing Get-AppxProvisionedPackage or Get-AppxPackage in case that is a case.
-      #
-      # Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx | Remove-AppxProvisionedPackage -Online
-      #
-      # # Try to remove the file path to help clear the disk.
-      # # It's not much but honest work
-      #
-      # # TODO make an option to remove the package from all user's appdata folder not just curr user
-      # $AppxPath="$Env:LOCALAPPDATA\Packages\$Appx*"
-      #
-      # Remove-Item $AppxPath -Recurse -Force -ErrorAction SilentlyContinue
+      foreach ($FullAppxName in $AppxProvSimilarList)
 
-    } # End if ($Appx -ne "")
-  } # End ForEach, $AppxListToRemove
-} # End removeAppxPackage()
+      $error.clear()
+      Try
+      {
+        #Could probably seprate each into its own try catch to differenciate between a failing Get-AppxProvisionedPackage or Get-AppxPackage in case that is a case.
+
+        Get-AppxProvisionedPackage -Online | Where DisplayName -like $Appx | Remove-AppxProvisionedPackage -Online
+
+        Get-AppxPackage -AllUsers | where PackageFullName -like $Appx | Remove-AppxPackage
+
+        #Try to remove the file path to help clear the disk.
+        #It's not much but honest work
+
+        #TODO make an option to remove the package from all user's appdata folder not just curr user
+        $AppxPath="$Env:LOCALAPPDATA\Packages\$Appx*"
+
+        Remove-Item $AppxPath -Recurse -Force -ErrorAction SilentlyContinue
+      }
+      catch
+      {
+        $UnsuccessfullyRemovedList += $Appx
+      }
+
+      if (!$Error)
+      {
+        $SuccessfullyRemovedList += $Appx
+      }
+
+
+
+
+    }
+  }
+}
 
 function removeWinOptFeat {
   param (
-    #Required, Check if they exist
     [ref]$WOFListToRemove
-
-    #Optional, when using check that they exist.
     [ref]$SuccessfullyRemoved
     [ref]$UnsuccessfullyRemoved
   )
 
-  ForEach ($WOF in $WOFListToRemove)
+  foreach ($WOF in $WOFListToRemove)
   {
     if ($WOF -ne "")
     {
